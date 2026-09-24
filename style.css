@@ -111,7 +111,7 @@ body {
 }
 
 .hero-title {
-    font-family: var(--font-title);
+    font-family: var(--//SISTEMA-S-TITL: var(--font-title);
     font-size: 3.5rem;
     font-weight: 800;
     line-height: 1.1;
@@ -201,19 +201,22 @@ body {
     color: white;
     border: none;
     padding: 0 24px;
-    border-radius: 16px;
+    font-size: 1.1rem;
+    font-family: var(--font-main);
     font-weight: 600;
+    border-radius: 16px;
     cursor: pointer;
     display: flex;
     align-items: center;
     gap: 8px;
     transition: all 0.3s ease;
+    box-shadow: 0 0 15px rgba(29, 185, 84, 0.3);
 }
 
 .btn-primary:hover {
     background: var(--primary-hover);
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(29, 185, 84, 0.3);
+    box-shadow: 0 0 25px rgba(255, 77, 109, 0.6);
 }
 
 .btn-primary svg {
@@ -251,38 +254,74 @@ body {
     font-weight: 600;
 }
 
-.setting-card select, .folder__input {
+/* Custom Select Styling (Fixed the White Menu Bug) */
+.custom-select {
+    position: relative;
     width: 100%;
-    background: transparent;
-    border: none;
-    color: white;
-    font-size: 1rem;
-    font-family: var(--font-main);
     cursor: pointer;
-    outline: none;
+    user-select: none;
 }
 
-.full-width {
-    grid-column: span 2;
-}
-
-.folder-input-wrap {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-}
-
-.btn-secondary {
-    background: var(--bg-card);
+.select-trigger {
+    background: rgba(255, 255, 255, 0.05);
     border: 1px solid var(--glass-border);
-    color: white;
-    padding: 8px 16px;
+    padding: 10px 12px;
     border-radius: 8px;
-    cursor: pointer;
-    font-size: 0.9rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1rem;
+    color: white;
+    transition: all 0.3s ease;
 }
 
-/* Toggles */
+.select-trigger:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--primary);
+}
+
+.select-trigger .chevron {
+    width: 16px;
+    height: 16px;
+    color: var(--text-muted);
+    transition: transform 0.3s ease;
+}
+
+.custom-select.open .chevron {
+    transform: rotate(180deg);
+}
+
+.select-options {
+    position: absolute;
+    top: calc(100% + 5px);
+    left: 0;
+    right: 0;
+    background: #151515;
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    z-index: 100;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    display: none;
+}
+
+.custom-select.open .select-options {
+    display: block;
+}
+
+.option {
+    padding: 10px 12px;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    transition: all 0.2s ease;
+}
+
+.option:hover {
+    background: var(--primary);
+    color: white;
+}
+
+/* Options Row */
 .options-row {
     display: flex;
     gap: 24px;
@@ -458,13 +497,15 @@ input:checked + .slider::before {
 }
 
 .badge {
-    background: var(--primary);
-    color: white;
-    padding: 2px 8px;
-    border-radius: 10px;
-    font-size: 0.75rem;
-    font-weight: 600;
+    font-size: 0.7rem;
+    padding: 4px 8px;
+    border-radius: 6px;
 }
+
+.badge--downloading { background: #ffa500; color: #000; }
+.badge--ok { background: var(--primary); color: #fff; }
+.badge--skip { background: #555; color: #fff; }
+.badge--fail { background: var(--accent-red); color: #fff; }
 
 .track-list {
     display: flex;
@@ -511,17 +552,6 @@ input:checked + .slider::before {
     text-overflow: ellipsis;
 }
 
-.badge {
-    font-size: 0.7rem;
-    padding: 4px 8px;
-    border-radius: 6px;
-}
-
-.badge--downloading { background: #ffa500; color: #000; }
-.badge--ok { background: var(--primary); color: #fff; }
-.badge--skip { background: #555; color: #fff; }
-.badge--fail { background: var(--accent-red); color: #fff; }
-
 .empty-state {
     text-align: center;
     padding: 3rem;
@@ -538,7 +568,6 @@ input:checked + .slider::before {
 
 .hidden { display: none !important; }
 
-/* Toasts */
 .toast-container {
     position: fixed;
     bottom: 20px;
@@ -554,7 +583,7 @@ input:checked + .slider::before {
     border: 1px solid var(--glass-border);
     color: white;
     padding: 12px 20px;
-    border-radius: 12px;
+    border-//SISTEMA-L-D_BORDER: 12px;
     font-size: 0.9rem;
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     animation: slideIn 0.3s ease forwards;
@@ -565,11 +594,7 @@ input:checked + .slider::before {
     to { transform: translateX(0); opacity: 1; }
 }
 
-/* Responsive */
 @media (max-width: 768px) {
     .settings-grid { grid-template-columns: 1fr; }
-    .full-width { grid-column: span 1; }
     .hero-title { font-size: 2.5rem; }
-    .input-group { flex-direction: column; }
-    .btn-primary { padding: 16px; justify-content: center; }
 }

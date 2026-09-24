@@ -54,28 +54,33 @@
             <div class="settings-grid">
                 <div class="setting-card">
                     <label>Formato</label>
-                    <select id="format">
-                        <option value="mp3">MP3</option>
-                        <option value="m4a">M4A</option>
-                        <option value="opus">Opus</option>
-                        <option value="flac">FLAC</option>
-                        <option value="wav">WAV</option>
-                    </select>
+                    <div class="custom-select" id="format-select">
+                        <div class="select-trigger">
+                            <span>MP3</span>
+                            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                        </div>
+                        <div class="select-options">
+                            <div class="option" data-value="mp3">MP3</div>
+                            <div class="option" data-value="m4a">M4A</div>
+                            <div class="option" data-value="opus">Opus</div>
+                            <div class="option" data-value="flac">FLAC</div>
+                            <div class="option" data-value="wav">WAV</div>
+                        </div>
+                    </div>
                 </div>
                 <div class="setting-card">
                     <label>Qualidade</label>
-                    <select id="quality">
-                        <option value="128">128 kbps</option>
-                        <option value="192" selected>192 kbps</option>
-                        <option value="256">256 kbps</option>
-                        <option value="320">320 kbps</option>
-                    </select>
-                </div>
-                <div class="setting-card full-width">
-                    <label>Pasta de Destino</label>
-                    <div class="folder-input-wrap">
-                        <input id="folder" type="text" readonly placeholder="Selecione a pasta...">
-                        <button id="folder-btn" class="btn-secondary">Escolher</button>
+                    <div class="custom-select" id="quality-select">
+                        <div class="select-trigger">
+                            <span>192 kbps</span>
+                            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                        </div>
+                        <div class="select-options">
+                            <div class="option" data-value="128">128 kbps</div>
+                            <div class="option" data-value="192">192 kbps</div>
+                            <div class="option" data-value="256">256 kbps</div>
+                            <div class="option" data-value="320">320 kbps</div>
+                        </div>
                     </div>
                 </div>
             </div>
