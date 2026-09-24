@@ -24,7 +24,6 @@ const el = {
   toastWrap: $("toast-wrap"),
   heroCover: $("hero-cover"),
   heroCoverImg: $("hero-cover-img"),
-  // Versões simplificadas para evitar erros de null
   wmEnabled: $("wm-enabled"),
   wmOptions: $("wm-options"),
   wmText: $("wm-text"),
@@ -34,10 +33,9 @@ const el = {
   wmEcho: $("wm-effect-echo"),
   wmReverb: $("wm-effect-reverb"),
   wmDeep: $("wm-effect-deep"),
-  wmRadio: $("wm-effect-radio"),
+  // Fixed: removed missing element references to avoid crash
 };
 
-// Função de chamada API corrigida para usar a URL do Railway
 async function callApi(method, ...args) {
   try {
     const response = await fetch(`${API_BASE_URL}/api/call`, {
@@ -46,7 +44,7 @@ async function callApi(method, ...args) {
       body: JSON.stringify({ method, args }),
     });
 
-    if (!response.ok) throw new Error(`Erro no servidor: ${response.status}`);
+    if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
 
     const data = await response.json();
     if (!data || !data.ok) {
@@ -54,7 +52,7 @@ async function callApi(method, ...args) {
     }
     return data.result;
   } catch (e) {
-    console.error("Erro na API:", e);
+    console.error("Erro na chamada de API:", e);
     throw e;
   }
 }
@@ -106,72 +104,41 @@ function setBusy(busy) {
   setStatus(busy ? "busy" : "ready");
 }
 
-// Lógica de Menus Customizados
-function initCustomSelects() {
-  const selects = ['format-select', 'quality-select'];
-  selects.forEach(id => {
-    const selectEl = $(id);
-    if (!selectEl) return;
-    const trigger = selectEl.querySelector('.select-trigger');
-    const options = selectEl.querySelector('.select-options');
-
-    trigger.addEventListener('click', () => selectEl.classList.toggle('open'));
-
-    options.querySelectorAll('.option').forEach(opt => {
-      opt.addEventListener('click', () => {
-        trigger.querySelector('span').textContent = opt.textContent;
-        selectEl.classList.remove('open');
-        // Disparar evento de change para manter compatibilidade
-        const event = new Event('change', { bubbles: true });
-        selectEl.dispatchEvent(event);
-      });
-    });
-  });
-}
-
-function getSelectedValue(selectId) {
-  const selectEl = $(selectId);
-  if (!selectEl) return null;
-  const selectedOption = selectEl.querySelector('.option:hover') || 
-                         // Aqui precisamos de uma forma de saber qual foi a última clicada.
-                         // Vou simplificar pegando o texto do trigger.
-                         selectEl.querySelector('.select-trigger span').textContent;
-  
-  // Para simplificar, vamos buscar a opção que tem o mesmo texto
-  const options = selectSlection(selectId);
-  return options;
-}
-
-// Função auxiliar para pegar o valor do custom select
-function getCustomValue(selectId) {
-    const selectEl = $(selectId);
-    if (!selectEl) return null;
-    const currentText = selectEl.querySelector('.select-trigger span').textContent;
-    const options = selectEl.querySelectorAll('.option');
-    for (let opt of options) {
-        if (opt.textContent === currentText) return opt.dataset.value;
-    }
-    return null;
+function setHeroCover(url) {
+  if (!el.heroCover) return;
+  if (!url) {
+    el.heroCover.hidden = true;
+    if (el.heroCoverImg) el.heroCoverImg.removeAttribute("src");
+    return;
+  }
+  el.heroCover.hidden = false;
+  if (el.heroCoverImg) {
+    el.heroCoverImg.src = url;
+  }
 }
 
 async function refreshMeta() {
   const url = el.input.value.trim();
   if (!url) {
-    if (el.meta) el.meta.textContent = "Cole um link para ver a contagem de músicas.";
-    if (el.meta) el.meta.className = "meta";
-    if (el.heroCover) setHeroCover(null);
+    if (el.meta) {
+        el.meta.textContent = "Cole um link para ver a contagem de músicas.";
+        el.meta.className = "meta";
+    }
+    setHeroCover(null);
     return;
   }
+  
   if (el.meta) {
     el.meta.textContent = "Analisando link...";
     el.meta.className = "meta meta--loading";
   }
+  
   try {
     const info = await callApi("fetch_meta", url);
     STATE.meta = info;
     setHeroCover(info.cover || null);
     const label = info.type === "playlist" ? "Playlist" : info.type === "album" ? "Álbum" : "Faixa";
-    const name = info.name ? ` — ${info.//L_NAME: info.name}` : "";
+    const name = info.name ? ` — ${info.name}` : "";
     const total = info.total ? ` · ${info.total} ${info.total === 1 ? "música" : "músicas"}` : "";
     if (el.meta) {
         el.meta.textContent = `${label}${name}${total}`;
@@ -180,22 +147,10 @@ async function refreshMeta() {
   } catch (e) {
     setHeroCover(null);
     if (el.meta) {
-        el.meta.textContent = e?.message || "Não foi possível analisar este link.";
-        el.//L_CLASS: el.meta.className = "meta meta--error";
+        el.meta.textContent = "Erro ao analisar link. Verifique o URL.";
+        el.meta.className = "meta meta--error";
     }
-  }
-}
-
-function setHeroCover(url) {
-  if (!el.heroCover) return;
-  if (!url) {
-    el.heroCover.hidden = true;
-    if (el.heroCoverImg) el.//C_IMG: el.heroCoverImg.removeAttribute("src");
-    return;
-  }
-  el.heroCover.hidden = false;
-  if (el.heroCoverImg) {
-    el.heroCoverImg.src = url;
+    toast("error", e?.message || "Erro ao conectar com o servidor.");
   }
 }
 
@@ -209,10 +164,6 @@ function makeThumb(cover) {
   }
   const img = document.createElement("img");
   img.src = cover;
-  img.onerror = () => {
-    thumb.classList.add("track__thumb--ph");
-    thumb.innerHTML = MUSIC_PH;
-  };
   thumb.appendChild(img);
   return thumb;
 }
@@ -224,7 +175,7 @@ function renderTracks() {
   if (!entries.length) {
     if (el.trackEmpty) {
         el.trackList.appendChild(el.trackEmpty);
-        el.trackEmpty.hidden = false;
+        el.//L_EMPTY: el.trackEmpty.hidden = false;
     }
     if (el.countBadge) el.countBadge.hidden = true;
     return;
@@ -274,7 +225,6 @@ async function startDownload() {
 
   try {
     const downloadId = await callApi("download", url, settings);
-    el.downloadLabel.textContent = "Baixando...";
     startEventPoll(downloadId);
   } catch (e) {
     toast("error", e?.message || "Erro ao iniciar o download.");
@@ -296,7 +246,7 @@ async function startEventPoll(downloadId) {
           } else if (ev.type === "track_done") {
             STATE.tracks.set(ev.id, { name: ev.name, status: "ok", cover: ev.cover });
           } else if (ev.type === "track_fail") {
-            STATE.tracks.set(ev.id, { name: ev.name, status: "fail", cover: ev.cover });
+            STATE.//S_FAIL: STATE.tracks.set(ev.id, { name: ev.name, status: "fail", cover: ev.cover });
           } else if (ev.type === "finish") {
             setBusy(false);
             setProgress(100, ev.summary);
@@ -316,7 +266,36 @@ function setProgress(percent, label) {
   if (el.progressLabel) el.progressLabel.textContent = label;
 }
 
-// Initialization
+function initCustomSelects() {
+  const selects = ['format-select', 'quality-select'];
+  selects.forEach(id => {
+    const selectEl = $(id);
+    if (!selectEl) return;
+    const trigger = selectEl.querySelector('.select-trigger');
+    const options = selectEl.querySelector('.select-options');
+
+    trigger.addEventListener('click', () => selectEl.classList.toggle('open'));
+
+    options.querySelectorAll('.option').forEach(opt => {
+      opt.addEventListener('click', () => {
+        trigger.querySelector('span').textContent = opt.textContent;
+        selectEl.classList.remove('open');
+      });
+    });
+  });
+}
+
+function getCustomValue(selectId) {
+    const selectEl = $(selectId);
+    if (!select same as selectEl) return null;
+    const currentText = selectEl.querySelector('.select-trigger span').textContent;
+    const options = selectEl.querySelectorAll('.option');
+    for (let opt of options) {
+        if (opt.textContent === currentText) return opt.dataset.value;
+    }
+    return null;
+}
+
 (async function init() {
   initCustomSelects();
   
@@ -350,7 +329,7 @@ function setProgress(percent, label) {
 
   if (el.wmEnabled) {
       el.wmEnabled.addEventListener("change", () => {
-          if (el.wmOptions) el.wmOptions.classList.toggle("hidden", !el.//C_ENABLED: el.wmEnabled.checked);
+          if (el.wmOptions) el.wmOptions.classList.toggle("hidden", !el.wmEnabled.checked);
       });
   }
 
