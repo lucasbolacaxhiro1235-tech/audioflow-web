@@ -2,7 +2,7 @@
 
 const $ = (id) => document.getElementById(id);
 
-// CONFIGURAÇÃO DO BACKEND (RAILWAY)
+// URL FIXA DO SEU SERVIDOR RAILWAY (PARA NÃO TER ERRO)
 const API_BASE_URL = 'https://web-production-5803.up.railway.app';
 
 const el = {
@@ -33,7 +33,6 @@ const el = {
   wmEcho: $("wm-effect-echo"),
   wmReverb: $("wm-effect-reverb"),
   wmDeep: $("wm-effect-deep"),
-  // Fixed: removed missing element references to avoid crash
 };
 
 async function callApi(method, ...args) {
@@ -44,7 +43,7 @@ async function callApi(method, ...args) {
       body: JSON.stringify({ method, args }),
     });
 
-    if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
+    if (!response.ok) throw new Error(`Erro no Servidor: ${response.status}`);
 
     const data = await response.json();
     if (!data || !data.ok) {
@@ -52,7 +51,7 @@ async function callApi(method, ...args) {
     }
     return data.result;
   } catch (e) {
-    console.error("Erro na chamada de API:", e);
+    console.error("API Error:", e);
     throw e;
   }
 }
@@ -72,6 +71,7 @@ const STATE = {
 };
 
 function toast(kind, message) {
+  if (!el.toastWrap) return;
   const node = document.createElement("div");
   node.className = `toast toast--${kind}`;
   node.innerHTML = `${Icons[kind] || ""}<span>${escapeHtml(message)}</span>`;
@@ -147,10 +147,10 @@ async function refreshMeta() {
   } catch (e) {
     setHeroCover(null);
     if (el.meta) {
-        el.meta.textContent = "Erro ao analisar link. Verifique o URL.";
+        el.meta.textContent = "Erro ao analisar link. Verifique a conexão com o servidor.";
         el.meta.className = "meta meta--error";
     }
-    toast("error", e?.message || "Erro ao conectar com o servidor.");
+    // Não mostramos toast aqui para não incomodar enquanto digita
   }
 }
 
@@ -175,7 +175,7 @@ function renderTracks() {
   if (!entries.length) {
     if (el.trackEmpty) {
         el.trackList.appendChild(el.trackEmpty);
-        el.//L_EMPTY: el.trackEmpty.hidden = false;
+        el.trackEmpty.hidden = false;
     }
     if (el.countBadge) el.countBadge.hidden = true;
     return;
@@ -206,6 +206,13 @@ async function startDownload() {
     return;
   }
   
+  // Força a atualização da meta antes de baixar para garantir que o link é válido
+  await refreshMeta();
+  if (STATE.meta === null) {
+      toast("error", "Link inválido ou servidor offline.");
+      return;
+  }
+
   const settings = {
     format: getCustomValue("format-select") || "mp3",
     quality: getCustomValue("quality-select") || "192",
@@ -246,7 +253,7 @@ async function startEventPoll(downloadId) {
           } else if (ev.type === "track_done") {
             STATE.tracks.set(ev.id, { name: ev.name, status: "ok", cover: ev.cover });
           } else if (ev.type === "track_fail") {
-            STATE.//S_FAIL: STATE.tracks.set(ev.id, { name: ev.name, status: "fail", cover: ev.cover });
+            STATE.tracks.set(ev.id, { name: ev.name, status: "fail", cover: ev.cover });
           } else if (ev.type === "finish") {
             setBusy(false);
             setProgress(100, ev.summary);
@@ -287,7 +294,7 @@ function initCustomSelects() {
 
 function getCustomValue(selectId) {
     const selectEl = $(selectId);
-    if (!select same as selectEl) return null;
+    if (!selectEl) return null;
     const currentText = selectEl.querySelector('.select-trigger span').textContent;
     const options = selectEl.querySelectorAll('.option');
     for (let opt of options) {
