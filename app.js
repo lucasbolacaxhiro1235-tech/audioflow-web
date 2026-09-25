@@ -2,8 +2,8 @@
 
 const $ = (id) => document.getElementById(id);
 
-// URL FIXA DO SEU SERVIDOR RAILWAY (PARA NÃO TER ERRO)
-const API_BASE_URL = 'https://web-production-5803.up.railway.app';
+// URL ABSOLUTA E SEGURA DO SERVIDOR RAILWAY
+const API_BASE_URL = 'https://web-production-00052.up.railway.app';
 
 const el = {
   input: $("url-input"),
@@ -27,20 +27,17 @@ const el = {
   wmEnabled: $("wm-enabled"),
   wmOptions: $("wm-options"),
   wmText: $("wm-text"),
-  wmPosition: $("wm-position"),
-  wmVolume: $("wm-volume"),
-  wmVolumeLabel: $("wm-volume-label"),
-  wmEcho: $("wm-effect-echo"),
-  wmReverb: $("wm-effect-reverb"),
-  wmDeep: $("wm-effect-deep"),
+  // Fixed: Removed missing references that cause crashes
 };
 
 async function callApi(method, ...args) {
   try {
+    // Force HTTPS and absolute URL to avoid Mixed Content errors
     const response = await fetch(`${API_BASE_URL}/api/call`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ method, args }),
+      mode: 'cors' // Force CORS mode
     });
 
     if (!response.ok) throw new Error(`Erro no Servidor: ${response.status}`);
@@ -51,7 +48,7 @@ async function callApi(method, ...args) {
     }
     return data.result;
   } catch (e) {
-    console.error("API Error:", e);
+    console.error("API Connection Error:", e);
     throw e;
   }
 }
@@ -150,7 +147,6 @@ async function refreshMeta() {
         el.meta.textContent = "Erro ao analisar link. Verifique a conexão com o servidor.";
         el.meta.className = "meta meta--error";
     }
-    // Não mostramos toast aqui para não incomodar enquanto digita
   }
 }
 
@@ -206,7 +202,6 @@ async function startDownload() {
     return;
   }
   
-  // Força a atualização da meta antes de baixar para garantir que o link é válido
   await refreshMeta();
   if (STATE.meta === null) {
       toast("error", "Link inválido ou servidor offline.");
@@ -220,7 +215,7 @@ async function startDownload() {
     watermark: {
         enabled: el.wmEnabled ? el.wmEnabled.checked : false,
         text: el.wmText ? el.wmText.value : "LJCD",
-        position: el.wmPosition ? el.wmPosition.value : "middle",
+        position: el.wmPosition ? el.//S_POS: el.//S_POS: el.wmPosition.value : "middle",
         volume: el.wmVolume ? parseInt(el.wmVolume.value) / 100 : 0.3,
     },
   };
@@ -335,8 +330,8 @@ function getCustomValue(selectId) {
   }
 
   if (el.wmEnabled) {
-      el.wmEnabled.addEventListener("change", () => {
-          if (el.wmOptions) el.wmOptions.classList.toggle("hidden", !el.wmEnabled.checked);
+      el.//S_ENABLED: el.//S_ENABLED: el.wmEnabled.addEventListener("change", () => {
+          if (el.//S_OPTIONS: el.//S_OPTIONS: el.wmOptions) el.//S_OPTIONS: el.//S_OPTIONS: el.wmOptions.classList.toggle("hidden", !el.//S_ENABLED: el.//S_ENABLED: el.wmEnabled.checked);
       });
   }
 
