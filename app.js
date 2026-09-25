@@ -27,26 +27,23 @@ const el = {
   wmEnabled: $("wm-enabled"),
   wmOptions: $("wm-options"),
   wmText: $("wm-text"),
-  // Fixed: Removed missing references that cause crashes
 };
 
-async function callApi(method, ...args) {
+async function callApi(endpoint, data = null) {
   try {
-    // Force HTTPS and absolute URL to avoid Mixed Content errors
-    const response = await fetch(`${API_BASE_URL}/api/call`, {
+    const options = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ method, args }),
-      mode: 'cors' // Force CORS mode
-    });
+      mode: 'cors'
+    };
+    if (data) options.body = JSON.stringify(data);
+
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
 
     if (!response.ok) throw new Error(`Erro no Servidor: ${response.status}`);
 
-    const data = await response.json();
-    if (!data || !data.ok) {
-      throw new Error(data?.error || "O servidor retornou um erro.");
-    }
-    return data.result;
+    const result = await response.json();
+    return result;
   } catch (e) {
     console.error("API Connection Error:", e);
     throw e;
@@ -131,12 +128,12 @@ async function refreshMeta() {
   }
   
   try {
-    const info = await callApi("fetch_meta", url);
+    const info = await callApi("/api/downloads/resolve", { url });
     STATE.meta = info;
-    setHeroCover(info.cover || null);
-    const label = info.type === "playlist" ? "Playlist" : info.type === "album" ? "Álbum" : "Faixa";
-    const name = info.name ? ` — ${info.name}` : "";
-    const total = info.total ? ` · ${info.total} ${info.total === 1 ? "música" : "músicas"}` : "";
+    setHeroCover(info.cover_url || null);
+    const label = info.kind === "playlist" ? "Playlist" : info.kind === "album" ? "Álbum" : "Faixa";
+    const name = info.title ? ` — ${info.title}` : "";
+    const total = info.track_count ? ` · ${info.track_count} ${info.track_count === 1 ? "música" : "músicas"}` : "";
     if (el.meta) {
         el.meta.textContent = `${label}${name}${total}`;
         el.meta.className = "meta";
@@ -209,6 +206,7 @@ async function startDownload() {
   }
   
   const settings = {
+    url: url,
     format: getCustomValue("format-select") || "mp3",
     quality: getCustomValue("quality-select") || "192",
     tracknum: el.tracknum ? el.tracknum.checked : false,
@@ -220,14 +218,13 @@ async function startDownload() {
     },
   };
 
-
   STATE.tracks.clear();
   renderTracks();
   setProgress(0, "Iniciando...");
   setBusy(true);
 
   try {
-    const downloadId = await callApi("download", url, settings);
+    const downloadId = await callApi("/api/downloads", settings);
     startEventPoll(downloadId);
   } catch (e) {
     toast("error", e?.message || "Erro ao iniciar o download.");
@@ -240,7 +237,7 @@ async function startEventPoll(downloadId) {
   let since = 0;
   async function tick() {
     try {
-      const r = await fetch(`${API_BASE_URL}/api/events/${downloadId}`);
+      const r = await fetch(`${API_BASE_URL}/api/downloads/${downloadId}/events`);
       const data = await r.json();
       if (data && Array.isArray(data.events)) {
         for (const ev of data.events) {
@@ -332,17 +329,17 @@ function getCustomValue(selectId) {
   if (el.stop) {
     el.stop.addEventListener("click", async () => {
         setBusy(false);
-        try { await callApi("cancel"); } catch(e) {}
+        try { await callApi("/api/downloads/cancel", { id: STATE.currentDownloadId }); } catch(e) {}
         toast("info", "Download interrompido.");
         setProgress(0, "");
     });
   }
-
+  
   if (el.wmEnabled) {
       el.wmEnabled.addEventListener("change", () => {
           if (el.wmOptions) el.wmOptions.classList.toggle("hidden", !el.wmEnabled.checked);
       });
   }
-
+  
   setStatus("ready");
 })();
