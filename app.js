@@ -207,7 +207,7 @@ async function startDownload() {
       toast("error", "Link inválido ou servidor offline.");
       return;
   }
-
+  
   const settings = {
     format: getCustomValue("format-select") || "mp3",
     quality: getCustomValue("quality-select") || "192",
@@ -215,10 +215,11 @@ async function startDownload() {
     watermark: {
         enabled: el.wmEnabled ? el.wmEnabled.checked : false,
         text: el.wmText ? el.wmText.value : "LJCD",
-        position: el.wmPosition ? el.//S_POS: el.//S_POS: el.wmPosition.value : "middle",
+        position: el.wmPosition ? el.wmPosition.value : "middle",
         volume: el.wmVolume ? parseInt(el.wmVolume.value) / 100 : 0.3,
     },
   };
+
 
   STATE.tracks.clear();
   renderTracks();
