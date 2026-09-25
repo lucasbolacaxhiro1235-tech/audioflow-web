@@ -331,8 +331,8 @@ function getCustomValue(selectId) {
   }
 
   if (el.wmEnabled) {
-      el.//S_ENABLED: el.//S_ENABLED: el.wmEnabled.addEventListener("change", () => {
-          if (el.//S_OPTIONS: el.//S_OPTIONS: el.wmOptions) el.//S_OPTIONS: el.//S_OPTIONS: el.wmOptions.classList.toggle("hidden", !el.//S_ENABLED: el.//S_ENABLED: el.wmEnabled.checked);
+      el.wmEnabled.addEventListener("change", () => {
+          if (el.wmOptions) el.wmOptions.classList.toggle("hidden", !el.wmEnabled.checked);
       });
   }
 
