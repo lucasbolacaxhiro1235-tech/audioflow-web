@@ -248,6 +248,14 @@ async function startEventPoll(downloadId) {
             STATE.tracks.set(ev.id, { name: ev.name, status: "downloading", cover: ev.cover });
           } else if (ev.type === "track_done") {
             STATE.tracks.set(ev.id, { name: ev.name, status: "ok", cover: ev.cover });
+            if (ev.file) {
+                const a = document.createElement("a");
+                a.href = `${API_BASE_URL}${ev.file}`;
+                a.download = ev.name || "audioflow_download";
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            }
           } else if (ev.type === "track_fail") {
             STATE.tracks.set(ev.id, { name: ev.name, status: "fail", cover: ev.cover });
           } else if (ev.type === "finish") {
