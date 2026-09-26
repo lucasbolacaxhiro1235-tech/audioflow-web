@@ -238,7 +238,7 @@ async function startDownload() {
 
   try {
     const downloadId = await callApi("/api/downloads", settings);
-    startEventPoll(downloadId);
+    startEventPoll(downloadId.id);
   } catch (e) {
     toast("error", e?.message || "Erro ao iniciar o download.");
     setBusy(false);
