@@ -141,7 +141,8 @@ async function refreshMeta() {
   } catch (e) {
     setHeroCover(null);
     if (el.meta) {
-        el.meta.textContent = "Erro ao analisar link. Verifique a conexão com o servidor.";
+        const errorMsg = e?.response?.data?.error || e?.message || "Erro ao analisar link. Verifique a conexão com o servidor.";
+        el.meta.textContent = errorMsg;
         el.meta.className = "meta meta--error";
     }
   }
