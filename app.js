@@ -31,9 +31,19 @@ const el = {
 
 async function callApi(endpoint, data = null) {
   try {
+    // Gera ou recupera um Client ID único para autenticação anônima
+    let clientId = localStorage.getItem("audioflow_client_id");
+    if (!clientId) {
+      clientId = crypto.randomUUID();
+      localStorage.setItem("audioflow_client_id", clientId);
+    }
+
     const options = {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "x-client-id": clientId 
+      },
     };
     if (data) options.body = JSON.stringify(data);
 
