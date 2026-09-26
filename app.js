@@ -34,13 +34,15 @@ async function callApi(endpoint, data = null) {
     const options = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      mode: 'cors'
     };
     if (data) options.body = JSON.stringify(data);
 
     const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
 
-    if (!response.ok) throw new Error(`Erro no Servidor: ${response.status}`);
+    if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.detail || errData.error || `Erro no Servidor: ${response.status}`);
+    }
 
     const result = await response.json();
     return result;
